@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "executors": {
+    "up": {
+      "implementation": "./src/executors/up/executor",
+      "schema": "./src/executors/up/schema.json",
+      "description": "migration up executor"
+    },
+    "down": {
+      "implementation": "./src/executors/down/executor",
+      "schema": "./src/executors/down/schema.json",
+      "description": "migration down executor"
+    },
+    "status": {
+      "implementation": "./src/executors/status/executor",
+      "schema": "./src/executors/down/schema.json",
+      "description": "migration status executor"
+    }
+  }
+}

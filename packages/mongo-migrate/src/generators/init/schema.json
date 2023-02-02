@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "cli": "nx",
+  "$id": "mongo-migrate-init",
+  "title": "Mongo Migrate: Init",
+  "type": "object",
+  "properties": {
+    "targetProject": {
+      "type": "string",
+      "description": "Name of the project to initialize migrations in",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What is the target project?"
+    },
+    "migrationDirectory": {
+      "type": "string",
+      "description": "A directory where the migrations will be added",
+      "alias": "d",
+      "default": "migrations",
+      "x-prompt": "Where should migrations be placed?"
+    }
+  },
+  "required": ["targetProject", "migrationDirectory"]
+}
