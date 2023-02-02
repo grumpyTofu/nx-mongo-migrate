@@ -34,7 +34,7 @@ const main = async () => {
   const config = '.npmrc';
   fs.cpSync(config, path.join(outputPath, config));
   process.chdir(outputPath);
-  //execSync('yarn publish');
+  execSync('yarn publish');
 };
 
 main().catch((error) => {
