@@ -6,6 +6,6 @@
   "generators": "./generators.json",
   "executors": "./executors.json",
   "publishConfig": {
-    "@grumpyTofu:registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   }
 }
