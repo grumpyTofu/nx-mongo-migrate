@@ -1,6 +1,6 @@
 {
   "name": "nx-mongo-migrate",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "MIT",
   "main": "src/index.js",
   "generators": "./generators.json",
@@ -8,5 +8,16 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/grumpyTofu/nx-mongo-migrate.git"
-  }
+  },
+  "keywords": [
+    "mongo",
+    "mongoose",
+    "database",
+    "migrations",
+    "mongo-migrate",
+    "nx",
+    "plugin",
+    "nx-plugin",
+    "typescript"
+  ]
 }
