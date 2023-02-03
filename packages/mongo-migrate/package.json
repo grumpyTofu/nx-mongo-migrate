@@ -5,9 +5,7 @@
   "main": "src/index.js",
   "generators": "./generators.json",
   "executors": "./executors.json",
-  "repository": {
-    "url": "https://github.com/grumpyTofu/nx-mongo-migrate.git"
-  },
+  "repository": "https://github.com/grumpyTofu/nx-mongo-migrate.git",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   }
