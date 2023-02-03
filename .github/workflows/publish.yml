@@ -20,6 +20,7 @@ jobs:
           always-auth: true
       - run: yarn install
       # - run: npx nx affected --target=publish
+      - run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
       - run: npx nx run mongo-migrate:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
