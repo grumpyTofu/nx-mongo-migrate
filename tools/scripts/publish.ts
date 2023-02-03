@@ -31,10 +31,10 @@ const main = async () => {
   if (!outputPath)
     throw `Could not find "build.options.outputPath" of project "${name}". Is project.json configured correctly?`;
 
-  const config = '.npmrc';
-  fs.cpSync(config, path.join(outputPath, config));
+//   const config = '.npmrc';
+//   fs.cpSync(config, path.join(outputPath, config));
   process.chdir(outputPath);
-  execSync('npm publish');
+  execSync('yarn publish --non-interactive');
 };
 
 main().catch((error) => {
