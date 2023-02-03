@@ -33,6 +33,10 @@ const main = async () => {
 
   const config = '.npmrc';
   fs.cpSync(config, path.join(outputPath, config));
+
+  const readme = 'README.md';
+  fs.cpSync(readme, path.join(outputPath, readme));
+
   process.chdir(outputPath);
   execSync('yarn publish --non-interactive');
 };
