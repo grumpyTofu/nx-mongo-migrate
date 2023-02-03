@@ -31,9 +31,12 @@ const main = async () => {
   if (!outputPath)
     throw `Could not find "build.options.outputPath" of project "${name}". Is project.json configured correctly?`;
 
-//   const config = '.npmrc';
-//   fs.cpSync(config, path.join(outputPath, config));
+  //   const config = '.npmrc';
+  //   fs.cpSync(config, path.join(outputPath, config));
   process.chdir(outputPath);
+  execSync(
+    'echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc'
+  );
   execSync('yarn publish --non-interactive');
 };
 
