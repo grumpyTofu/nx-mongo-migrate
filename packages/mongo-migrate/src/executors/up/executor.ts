@@ -4,7 +4,7 @@ import { getNxProject } from '../../utils/nx';
 import { validateMigrationInitialization } from '../../utils/project';
 import { UpExecutorSchema } from './schema';
 
-import * as path from 'path';
+import { join, basename, resolve } from 'path';
 import { readFileSync } from 'fs';
 import mongoose from 'mongoose';
 import { MigrationDocument, migrationSchema } from '../../data/migration.schema';
@@ -35,7 +35,7 @@ const applyMigration = async ({ db, project, Migrations, migration }: ApplyMigra
   if (!migrationConfig.up) throw 'Malformed migration file';
   await migrationConfig.up(db);
 
-  const filename = path.basename(migration);
+  const filename = basename(migration);
   const file = readFileSync(migration);
   const hash = hashFile(file);
 
@@ -47,14 +47,14 @@ export default async function runExecutor(options: UpExecutorSchema, context: Ex
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(path.join(context.root, 'migration.config'));
+  const configImport = await import(join(context.root, 'migration.config'));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();
 
   const Migrations = mongoose.model<MigrationDocument>('Migration', migrationSchema, db.migrationCollection);
 
-  const migrationDirectory = path.resolve(context.root, project.data.root, project.data['migrationDirectory']);
+  const migrationDirectory = resolve(context.root, project.data.root, project.data['migrationDirectory']);
 
   // get migrations from migrations directory, filter .gitkeep, and sort oldest to newest
   const migrations = getMigrations(migrationDirectory);
@@ -73,13 +73,13 @@ export default async function runExecutor(options: UpExecutorSchema, context: Ex
     appliedMigrations.map((m) =>
       validateAppliedMigrations(
         m,
-        migrations.find((name) => path.basename(name) === m.filename)
+        migrations.find((name) => basename(name) === m.filename)
       )
     )
   );
 
   // apply migrations for all new files in order
-  const pendingMigrations = migrations.filter((file) => !appliedMigrations.find((m) => m.filename === path.basename(file)));
+  const pendingMigrations = migrations.filter((file) => !appliedMigrations.find((m) => m.filename === basename(file)));
 
   const migrated = await Promise.all(
     pendingMigrations.map((migration) =>

@@ -15,8 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "mongo-migrate": ["packages/mongo-migrate/src/index.ts"]
+      "nx-mongo-migrate": ["packages/mongo-migrate/src/index.ts"],
+      "nx-mongo-migrate/example": ["packages/example/src/index.ts"]
     }
   },
+  "include": ["migration.config.ts"],
   "exclude": ["node_modules", "tmp"]
 }

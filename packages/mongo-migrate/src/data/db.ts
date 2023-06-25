@@ -5,6 +5,10 @@ export interface MigrationConfig extends mongoose.ConnectOptions {
   migrationCollection: string;
 }
 
+export type MigrationConfigFactory = () =>
+  | MigrationConfig
+  | Promise<MigrationConfig>;
+
 export class Database {
   dbUri: string;
   config: mongoose.ConnectOptions;
@@ -14,7 +18,11 @@ export class Database {
   connection?: mongoose.Connection;
   client?: mongoose.Connection['db'];
 
-  constructor({ dbUri, migrationCollection = 'migrations', ...config }: MigrationConfig) {
+  constructor({
+    dbUri,
+    migrationCollection = 'migrations',
+    ...config
+  }: MigrationConfig) {
     if (!dbUri) throw 'Database connection string was not defined.';
 
     this.dbUri = dbUri;

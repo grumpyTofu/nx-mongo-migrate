@@ -1,7 +1,7 @@
 import { getNxProject } from '../../utils/nx';
 import { StatusExecutorSchema } from './schema';
 
-import * as path from 'path';
+import { join } from 'path';
 import { validateMigrationInitialization } from '../../utils/project';
 import mongoose from 'mongoose';
 import { ExecutorContext } from '@nrwl/devkit';
@@ -16,9 +16,7 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(
-    path.join(context.root, 'migration.config')
-  );
+  const configImport = await import(join(context.root, 'migration.config'));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();
@@ -37,7 +35,7 @@ export default async function runExecutor(
   console.log(`Latest migration:`);
   console.log(`\tId: ${latest.id}`);
   console.log(
-    `\tFilename: ${path.join(
+    `\tFilename: ${join(
       project.data.root,
       project.data['migrationDirectory'],
       latest.filename
