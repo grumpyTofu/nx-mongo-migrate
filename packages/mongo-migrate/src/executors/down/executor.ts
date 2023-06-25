@@ -4,7 +4,7 @@ import { getNxProject } from '../../utils/nx';
 import { validateMigrationInitialization } from '../../utils/project';
 import { DownExecutorSchema } from './schema';
 
-import * as path from 'path';
+import { join } from 'path';
 import { readFileSync } from 'fs';
 import mongoose from 'mongoose';
 import {
@@ -21,9 +21,7 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(
-    path.join(context.root, 'migration.config')
-  );
+  const configImport = await import(join(context.root, 'migration.config'));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();
@@ -34,7 +32,7 @@ export default async function runExecutor(
     db.migrationCollection
   );
 
-  const migrationDirectory = path.join(
+  const migrationDirectory = join(
     project.data.root,
     project.data['migrationDirectory']
   );
@@ -51,10 +49,7 @@ export default async function runExecutor(
   }
 
   // get migration file associated with latest migration
-  const latestMigrationFilePath = path.join(
-    migrationDirectory,
-    latest.filename
-  );
+  const latestMigrationFilePath = join(migrationDirectory, latest.filename);
   const file = readFileSync(latestMigrationFilePath);
   const fileHash = hashFile(file);
 

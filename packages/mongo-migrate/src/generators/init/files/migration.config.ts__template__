@@ -1,8 +1,8 @@
-import { MigrationConfig } from 'nx-mongo-migrate';
+import { MigrationConfigFactory } from 'nx-mongo-migrate';
 
-const config: MigrationConfig = {
+const config: MigrationConfigFactory = () => ({
   dbUri: 'mongodb://localhost:27017',
   migrationCollection: 'migrations', // default
-};
+});
 
 export default config;
