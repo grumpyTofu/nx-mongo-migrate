@@ -4,11 +4,11 @@ import { getNxProject } from '../../utils/nx';
 import { validateMigrationInitialization } from '../../utils/project';
 import { UpExecutorSchema } from './schema';
 
-import { join, basename, resolve } from 'path';
+import { basename, resolve } from 'path';
 import { readFileSync } from 'fs';
 import mongoose from 'mongoose';
 import { MigrationDocument, migrationSchema } from '../../data/migration.schema';
-import { getMigrations, hashFile } from '../../utils/common';
+import { getMigrationConfigPath, getMigrations, hashFile } from '../../utils/common';
 
 const validateAppliedMigrations = async (migration: MigrationDocument, migrationPath: string) => {
   if (!migrationPath) throw `Migration file ${migration.filename} is missing`;
@@ -47,7 +47,7 @@ export default async function runExecutor(options: UpExecutorSchema, context: Ex
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(join(context.root, 'migration.config'));
+  const configImport = await import(getMigrationConfigPath(context, project.name));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();

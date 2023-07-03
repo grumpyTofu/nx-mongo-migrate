@@ -7,6 +7,8 @@ import {
 } from '@nrwl/devkit';
 import { sync } from 'glob';
 import { createHash } from 'crypto';
+import path = require('path');
+import { accessSync, constants } from 'fs';
 
 export function getProjectRoot(context: ExecutorContext): string {
   if (context.projectName) {
@@ -52,3 +54,13 @@ export const hashFile = (file: Buffer) => {
   hash.update(file);
   return hash.digest('hex');
 };
+
+export function getMigrationConfigPath(context: ExecutorContext, projectName: string) {
+  const filePath = path.join(context.root, 'apps', projectName, 'migration.config.ts');
+  try {
+    accessSync(filePath, constants.F_OK);
+    return filePath
+  } catch (err) {
+    return path.join(context.root, 'migration.config')
+  }
+}
