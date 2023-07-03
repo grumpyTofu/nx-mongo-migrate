@@ -20,7 +20,13 @@
       "alias": "d",
       "default": "migrations",
       "x-prompt": "Where should migrations be placed?"
+    },
+    "createAppMigrationConfig": {
+      "type": "boolean",
+      "description": "A configuration file where the migration config specific to the application will be created",
+      "default": false,
+      "x-prompt": "Would you like to create migration config specific to this application?"
     }
   },
-  "required": ["targetProject", "migrationDirectory"]
+  "required": ["targetProject", "migrationDirectory", "createAppMigrationConfig"]
 }

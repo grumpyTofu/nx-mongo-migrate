@@ -7,6 +7,7 @@ import mongoose from 'mongoose';
 import { ExecutorContext } from '@nrwl/devkit';
 import { migrationSchema } from '../../data/migration.schema';
 import { Database } from '../../data/db';
+import { getMigrationConfigPath } from '../../utils/common';
 
 export default async function runExecutor(
   options: StatusExecutorSchema,
@@ -16,7 +17,7 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(join(context.root, 'migration.config'));
+  const configImport = await import(getMigrationConfigPath(context, project.name));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();

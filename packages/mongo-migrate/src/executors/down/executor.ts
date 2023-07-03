@@ -11,7 +11,7 @@ import {
   MigrationDocument,
   migrationSchema,
 } from '../../data/migration.schema';
-import { hashFile } from '../../utils/common';
+import { getMigrationConfigPath, hashFile } from '../../utils/common';
 
 export default async function runExecutor(
   options: DownExecutorSchema,
@@ -21,7 +21,7 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(join(context.root, 'migration.config'));
+  const configImport = await import(getMigrationConfigPath(context, project.name));
   const config = await configImport.default();
   const db = new Database(config);
   await db.connect();

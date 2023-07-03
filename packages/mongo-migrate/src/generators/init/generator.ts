@@ -25,11 +25,14 @@ const addFiles = (tree: Tree, options: NormalizedSchema) => {
     timestamp: now.getTime(),
   };
   generateFiles(tree, join(__dirname, 'files'), '', templateOptions);
+  if (options.createAppMigrationConfig) {
+    generateFiles(tree, join(__dirname, 'files'), `apps/${options.projectName}`, templateOptions);
+  }
 };
 
 export default async function (
   tree: Tree,
-  { targetProject, migrationDirectory = 'migrations' }: InitGeneratorSchema
+  { targetProject, migrationDirectory = 'migrations', createAppMigrationConfig = false }: InitGeneratorSchema
 ) {
   const project = getNxProject(targetProject);
 
@@ -69,6 +72,7 @@ export default async function (
     projectName: project.name,
     targetProject,
     migrationDirectory,
+    createAppMigrationConfig,
   });
 
   tree.write(`${join(root, migrationDirectory)}/.gitkeep`, '');
