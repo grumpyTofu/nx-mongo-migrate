@@ -1,8 +1,8 @@
 import { MigrationConfigFactory } from 'nx-mongo-migrate';
 
-const config: MigrationConfigFactory = () => ({
+const config: MigrationConfigFactory = async(factory = () => ({
   dbUri: 'mongodb://localhost:27017',
   migrationCollection: 'migrations', // default
-});
+})) => await factory();
 
 export default config;

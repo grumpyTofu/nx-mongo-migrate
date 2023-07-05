@@ -1,2 +1,2 @@
 export * from './utils/project';
-export type { MigrationConfig } from './data/db';
+export type { MigrationConfig, MigrationConfigFactory } from './data/db';
