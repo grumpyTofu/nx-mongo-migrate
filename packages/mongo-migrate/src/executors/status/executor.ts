@@ -32,6 +32,12 @@ export default async function runExecutor(
     {},
     { sort: { dateApplied: -1 } }
   );
+  if (!latest) {
+    console.log('Migration not found')
+    return {
+      success: true
+    }
+  }
 
   console.log(`Latest migration:`);
   console.log(`\tId: ${latest.id}`);
