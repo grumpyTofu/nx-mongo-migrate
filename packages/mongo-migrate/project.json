@@ -59,8 +59,15 @@
     "publish": {
       "executor": "nx:run-commands",
       "dependsOn": ["build"],
-      "options": {
-        "command": "ts-node ./tools/scripts/publish.ts -n mongo-migrate"
+      "defaultConfiguration": "production",
+      "configurations": {
+        "local": {
+          "cwd": "dist/packages/mongo-migrate",
+          "command": "yalc publish"
+        },
+        "production": {
+          "command": "ts-node ./tools/scripts/publish.ts -n mongo-migrate"
+        }
       }
     }
   },

@@ -20,7 +20,7 @@ export default {
     to work around this, you can throw an error to purposely cause the migration to fail for debugging like so:
     the "break-glass" option is to manually modify the migrations in mongodb, but this is NOT recommended
     */
-    // throw 'debug';
+    // throw new Error('debug');
   },
   async down() {
     Todo.remove();

@@ -4,7 +4,7 @@ export const getNxProject = (name: string) => {
   const graph = readCachedProjectGraph();
   const project = graph.nodes[name];
 
-  if (!project) throw 'Project not found.';
+  if (!project) throw new Error('Project not found.');
 
   return project;
 };

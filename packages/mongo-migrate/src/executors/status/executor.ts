@@ -1,13 +1,15 @@
-import { getNxProject } from '../../utils/nx';
 import { StatusExecutorSchema } from './schema';
 
 import { join } from 'path';
-import { validateMigrationInitialization } from '../../utils/project';
 import mongoose from 'mongoose';
 import { ExecutorContext } from '@nrwl/devkit';
-import { migrationSchema } from '../../data/migration.schema';
-import { Database } from '../../data/db';
-import { getMigrationConfigPath } from '../../utils/common';
+import { migrationSchema, Database } from '../../data';
+import {
+  getNxProject,
+  getMigrationConfigPath,
+  importMigrationConfigAsync,
+  validateMigrationInitialization,
+} from '../../utils';
 
 export default async function runExecutor(
   options: StatusExecutorSchema,
@@ -17,8 +19,8 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(getMigrationConfigPath(context, project.name));
-  const config = await configImport.default();
+  const configImportPath = getMigrationConfigPath(context);
+  const config = await importMigrationConfigAsync(context, configImportPath);
   const db = new Database(config);
   await db.connect();
 
@@ -33,10 +35,10 @@ export default async function runExecutor(
     { sort: { dateApplied: -1 } }
   );
   if (!latest) {
-    console.log('Migration not found')
+    console.log('No migrations found');
     return {
-      success: true
-    }
+      success: true,
+    };
   }
 
   console.log(`Latest migration:`);

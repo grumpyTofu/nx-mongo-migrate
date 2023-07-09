@@ -23,7 +23,9 @@ export class Database {
     migrationCollection = 'migrations',
     ...config
   }: MigrationConfig) {
-    if (!dbUri) throw 'Database connection string was not defined.';
+    if (!dbUri) {
+      throw new Error('Database connection string was not defined.');
+    }
 
     this.dbUri = dbUri;
     this.migrationCollection = migrationCollection;
