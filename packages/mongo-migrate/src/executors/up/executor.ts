@@ -1,72 +1,105 @@
 import { ExecutorContext, ProjectGraphProjectNode } from '@nrwl/devkit';
-import { Database } from '../../data/db';
-import { getNxProject } from '../../utils/nx';
-import { validateMigrationInitialization } from '../../utils/project';
+import { Database, MigrationDocument, migrationSchema } from '../../data';
+import {
+  getNxProject,
+  validateMigrationInitialization,
+  getMigrationConfigPath,
+  getMigrations,
+  hashFile,
+  importMigrationAsync,
+  importMigrationConfigAsync,
+} from '../../utils';
 import { UpExecutorSchema } from './schema';
 
 import { basename, resolve } from 'path';
 import { readFileSync } from 'fs';
 import mongoose from 'mongoose';
-import { MigrationDocument, migrationSchema } from '../../data/migration.schema';
-import { getMigrationConfigPath, getMigrations, hashFile } from '../../utils/common';
 
-const validateAppliedMigrations = async (migration: MigrationDocument, migrationPath: string) => {
-  if (!migrationPath) throw `Migration file ${migration.filename} is missing`;
+const validateAppliedMigrations = async (
+  migration: MigrationDocument,
+  migrationPath: string
+) => {
+  if (!migrationPath) {
+    throw new Error(`Migration file ${migration.filename} is missing`);
+  }
 
   const file = readFileSync(migrationPath);
   const fileHash = hashFile(file);
 
-  if (migration.hash !== fileHash) throw `Migration ${migration.id} is out of sync`;
+  if (migration.hash !== fileHash) {
+    throw new Error(`Migration ${migration.id} is out of sync`);
+  }
 };
 
 interface ApplyMigrationArgs {
   db: mongoose.Connection['db'];
   project: ProjectGraphProjectNode;
-  Migrations: mongoose.Model<MigrationDocument, object, object, object, any>;
-  migration: string;
+  Migrations: mongoose.Model<MigrationDocument, object, object, object, never>;
+  migrationPath: string;
+  context: ExecutorContext;
 }
 
-const applyMigration = async ({ db, project, Migrations, migration }: ApplyMigrationArgs) => {
-  const migrationImport = await import(migration);
+const applyMigration = async ({
+  db,
+  project,
+  Migrations,
+  migrationPath,
+  context
+}: ApplyMigrationArgs) => {
+  const migration = await importMigrationAsync(context, migrationPath);
+  await migration.up(db);
 
-  if (!migrationImport.default) throw 'Malformed migration file';
-  const migrationConfig = migrationImport.default;
-
-  if (!migrationConfig.up) throw 'Malformed migration file';
-  await migrationConfig.up(db);
-
-  const filename = basename(migration);
-  const file = readFileSync(migration);
+  const filename = basename(migrationPath);
+  const file = readFileSync(migrationPath);
   const hash = hashFile(file);
 
-  return Migrations.create({ project: project.name, filename, hash, dateApplied: new Date() });
+  return Migrations.create({
+    project: project.name,
+    filename,
+    hash,
+    dateApplied: new Date(),
+  });
 };
 
-export default async function runExecutor(options: UpExecutorSchema, context: ExecutorContext) {
+export default async function runExecutor(
+  options: UpExecutorSchema,
+  context: ExecutorContext
+) {
   const project = getNxProject(context.projectName);
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(getMigrationConfigPath(context, project.name));
-  const config = await configImport.default();
+  const configImportPath = getMigrationConfigPath(context);
+  const config = await importMigrationConfigAsync(context, configImportPath);
   const db = new Database(config);
   await db.connect();
 
-  const Migrations = mongoose.model<MigrationDocument>('Migration', migrationSchema, db.migrationCollection);
+  const Migrations = mongoose.model<MigrationDocument>(
+    'Migration',
+    migrationSchema,
+    db.migrationCollection
+  );
 
-  const migrationDirectory = resolve(context.root, project.data.root, project.data['migrationDirectory']);
+  const migrationDirectory = resolve(
+    context.root,
+    project.data.root,
+    project.data['migrationDirectory']
+  );
 
   // get migrations from migrations directory, filter .gitkeep, and sort oldest to newest
   const migrations = getMigrations(migrationDirectory);
 
   if (migrations.length === 0) {
-    console.error('No migrations to apply. Try using the mongo-migrate generator first to create a new migration');
-    return {
-      success: false,
-    };
+    console.error(
+      'No migrations to apply. Try using the mongo-migrate generator first to create a new migration'
+    );
+    return { success: false };
   }
 
-  const appliedMigrations = await Migrations.find({ project: project.name }, { filename: 1, hash: 1 });
+  const appliedMigrations = await Migrations.find(
+    { project: project.name },
+    { filename: 1, hash: 1 }
+  );
 
   // check all applied migrations and ensure hashes match db - if not throw out of sync error
   await Promise.all(
@@ -79,15 +112,18 @@ export default async function runExecutor(options: UpExecutorSchema, context: Ex
   );
 
   // apply migrations for all new files in order
-  const pendingMigrations = migrations.filter((file) => !appliedMigrations.find((m) => m.filename === basename(file)));
+  const pendingMigrations = migrations.filter(
+    (file) => !appliedMigrations.find((m) => m.filename === basename(file))
+  );
 
   const migrated = await Promise.all(
-    pendingMigrations.map((migration) =>
+    pendingMigrations.map((migrationPath) =>
       applyMigration({
         db: db.client,
         project,
-        migration,
+        migrationPath,
         Migrations,
+        context
       })
     )
   );
@@ -95,10 +131,10 @@ export default async function runExecutor(options: UpExecutorSchema, context: Ex
   if (migrated.length === 0) {
     console.log('Database is up to date');
   } else {
-    console.log(`Successfully migrated:\n ${migrated.map((m) => m.filename).join(',\n')}`);
+    console.log(
+      `Successfully migrated:\n ${migrated.map((m) => m.filename).join(',\n')}`
+    );
   }
 
-  return {
-    success: true,
-  };
+  return { success: true };
 }

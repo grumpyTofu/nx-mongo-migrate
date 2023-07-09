@@ -1,17 +1,18 @@
 import { ExecutorContext } from '@nrwl/devkit';
-import { Database } from '../../data/db';
-import { getNxProject } from '../../utils/nx';
-import { validateMigrationInitialization } from '../../utils/project';
+import { Database, MigrationDocument, migrationSchema } from '../../data';
+import {
+  getNxProject,
+  validateMigrationInitialization,
+  getMigrationConfigPath,
+  hashFile,
+  importMigrationConfigAsync,
+  importMigrationAsync,
+} from '../../utils';
 import { DownExecutorSchema } from './schema';
 
 import { join } from 'path';
 import { readFileSync } from 'fs';
 import mongoose from 'mongoose';
-import {
-  MigrationDocument,
-  migrationSchema,
-} from '../../data/migration.schema';
-import { getMigrationConfigPath, hashFile } from '../../utils/common';
 
 export default async function runExecutor(
   options: DownExecutorSchema,
@@ -21,8 +22,8 @@ export default async function runExecutor(
 
   validateMigrationInitialization(project);
 
-  const configImport = await import(getMigrationConfigPath(context, project.name));
-  const config = await configImport.default();
+  const configImportPath = getMigrationConfigPath(context);
+  const config = await importMigrationConfigAsync(context, configImportPath);
   const db = new Database(config);
   await db.connect();
 
@@ -54,17 +55,15 @@ export default async function runExecutor(
   const fileHash = hashFile(file);
 
   // validate file hash
-  if (latest.hash !== fileHash)
-    throw 'Failure to downgrade: Previous migration has been altered since last upgrade. Manual intervention is required';
+  if (latest.hash !== fileHash) {
+    throw new Error(
+      'Failure to downgrade: Previous migration has been altered since last upgrade. Manual intervention is required'
+    );
+  }
 
   // downgrade
-  const migrationImport = await import(latestMigrationFilePath);
-
-  if (!migrationImport.default) throw 'Malformed migration file';
-  const migrationConfig = migrationImport.default;
-
-  if (!migrationConfig.down) throw 'Malformed migration file';
-  await migrationConfig.down(db.client);
+  const migration = await importMigrationAsync(context, latestMigrationFilePath);
+  await migration.down(db.client);
 
   // remove migration from database
   await Migrations.findByIdAndDelete(latest.id);
@@ -83,7 +82,5 @@ export default async function runExecutor(
     console.log(`Successfully downgraded all migrations for ${project.name}`);
   }
 
-  return {
-    success: true,
-  };
+  return { success: true };
 }

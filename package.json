@@ -6,7 +6,9 @@
   "private": true,
   "dependencies": {
     "@swc/helpers": "~0.4.11",
+    "esbuild": "^0.18.11",
     "mongoose": "^6.9.0",
+    "require-from-string": "^2.0.2",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
@@ -23,6 +25,7 @@
     "@types/glob": "^8.0.1",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.18",
+    "@types/require-from-string": "^1.2.1",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "eslint": "~8.15.0",

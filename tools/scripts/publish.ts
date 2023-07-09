@@ -21,15 +21,21 @@ const main = async () => {
   const graph = readCachedProjectGraph();
   const project = graph.nodes[name];
 
-  if (!project)
-    throw `Could not find project "${name}" in the workspace. Is the project.json configured correctly?`;
+  if (!project) {
+    throw new Error(
+      `Could not find project "${name}" in the workspace. Is the project.json configured correctly?`
+    );
+  }
 
   const outputPath = path.join(
     rootPath,
     project.data?.targets?.build?.options?.outputPath
   );
-  if (!outputPath)
-    throw `Could not find "build.options.outputPath" of project "${name}". Is project.json configured correctly?`;
+  if (!outputPath) {
+    throw new Error(
+      `Could not find "build.options.outputPath" of project "${name}". Is project.json configured correctly?`
+    );
+  }
 
   const config = '.npmrc';
   fs.cpSync(config, path.join(outputPath, config));
@@ -42,6 +48,8 @@ const main = async () => {
 };
 
 main().catch((error) => {
-  console.error(chalk.bold.red('An error occurred during deployment', error));
+  console.error(
+    chalk.bold.red('An error occurred during deployment', error.message)
+  );
   throw error;
 });
