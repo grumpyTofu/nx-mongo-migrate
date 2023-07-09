@@ -4,15 +4,14 @@ export default {
   // The nx-mongo-migrate engine passes the full db connection as a param for easy access if needed
   // async up(db: mongoose.Connection['db']) {
   async up() {
-    const seedTodos = Array.from({ length: 10 }).map(
-      (_, i) =>
-        new Todo({
-          title: `Test Todo ${i + 1}`,
-          value: `complete task ${i + 1}`,
-        })
+    const seedTodoPromises = Array.from({ length: 10 }).map((_, i) =>
+      Todo.create({
+        title: `Test Todo ${i + 1}`,
+        value: `complete task ${i + 1}`,
+      })
     );
 
-    Todo.insertMany(seedTodos);
+    await Promise.all(seedTodoPromises);
 
     /* HINT:
     By default, Nx-mongo-migrate will track migrations as soon as they succeed by the file hash.
@@ -23,6 +22,6 @@ export default {
     // throw new Error('debug');
   },
   async down() {
-    Todo.remove();
+    await Todo.deleteMany();
   },
 };
