@@ -1,10 +1,4 @@
-import {
-  formatFiles,
-  generateFiles,
-  names,
-  Tree,
-  updateProjectConfiguration,
-} from '@nrwl/devkit';
+import { formatFiles, generateFiles, names, Tree, updateProjectConfiguration, updateJson } from '@nrwl/devkit';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -24,10 +18,13 @@ const addFiles = (tree: Tree, options: NormalizedSchema) => {
     template: '',
     timestamp: now.getTime(),
   };
-  generateFiles(tree, join(__dirname, 'files'), '', templateOptions);
   if (options.createAppMigrationConfig) {
     generateFiles(tree, join(__dirname, 'files'), `apps/${options.projectName}`, templateOptions);
+  } else {
+    generateFiles(tree, join(__dirname, 'files'), '', templateOptions);
   }
+
+  generateFiles(tree, join(__dirname, 'projectFiles'), `apps/${options.projectName}`, templateOptions);
 };
 
 export default async function (
@@ -73,6 +70,21 @@ export default async function (
     targetProject,
     migrationDirectory,
     createAppMigrationConfig,
+  });
+
+  updateJson(tree, join(root, 'tsconfig.json'), (tsconfig) => {
+    const projectMigrationTsconfig = './tsconfig.migrations.json';
+    const projectMigrationTsconfigExists = !!tsconfig.references.find((r: any) => r.path === projectMigrationTsconfig);
+    if (projectMigrationTsconfigExists) return tsconfig;
+    return {
+      ...tsconfig,
+      references: [
+        ...tsconfig.references,
+        {
+          path: projectMigrationTsconfig,
+        },
+      ],
+    };
   });
 
   tree.write(`${join(root, migrationDirectory)}/.gitkeep`, '');
